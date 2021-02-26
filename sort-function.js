@@ -16,7 +16,7 @@
  * 输出为
  * [7, 5, 1, 2, 3, 6, 8];
  */
-function sort(list) {
+function sort1(list) {
   //现在我对用例的理解是，所有的项都会链接到 fist 和 last 两部分上，再将两个拼起来即可。
   //可能有多个fist的情况，则不同first的部分前后关系不确定。
   let first = [];//可能有多个first/last
@@ -72,6 +72,128 @@ function sort(list) {
   return first.concat(last).map(item => item.id);
 }
 
+function sort2(list) {
+  let find = function(list, id) {
+    for (let i = 0; i < list.length;i++) {
+      if (list[i].id == id || list[i].endId == id) {
+        return i;
+      }
+    }
+    throw new Error('无解');
+  }
+
+  while(list.length > 2) {
+    let obj = list.shift();
+    if (obj.before) {
+      let pos = find(list, obj.before);
+      let item = {};
+      if (obj.value == undefined) { obj.value = [obj.id] }
+      if (list[pos].value == undefined) { list[pos].value = [list[pos].id] }
+
+      item.value = obj.value.concat(list[pos].value);
+      item.id = obj.value[0];
+      item.endId = list[pos].value[list[pos].value.length - 1];
+
+      item.first = list[pos].first;
+      item.last = list[pos].last;
+      item.before = list[pos].before;
+      item.after = list[pos].after;
+
+      list.splice(pos, 1);
+      list.push(item);
+    } else if (obj.after) {
+      let pos = find(list, obj.after);
+      let item = {};
+      if (obj.value == undefined) { obj.value = [obj.id] }
+      if (list[pos].value == undefined) { list[pos].value = [list[pos].id] }
+
+      item.value = list[pos].value.concat(obj.value);
+      item.id = list[pos].value[0];
+      item.endId = obj.value[obj.value.length - 1];
+
+      item.first = list[pos].first;
+      item.last = list[pos].last;
+      item.before = list[pos].before;
+      item.after = list[pos].after;
+
+      list.splice(pos, 1);
+      list.push(item);
+    } else {
+      list.push(obj);
+    }
+    console.log(list);
+  }
+
+  if (list.length <= 2) {
+    if (list[0].first) {
+      return list[0].value.concat(list[1].value);
+    } else {
+      return list[1].value.concat(list[0].value);
+    }
+  }
+}
+
+function sort(list) {
+  // id 起始， endId 末尾， value 存起始到末尾的ids
+  // 例如： { id: 1, endId 2, value: [1,5,4,2] }
+  
+  let find = function(list, id) {
+    for (let i = 0; i < list.length;i++) {
+      if (list[i].id == id || list[i].endId == id) {
+        return i;
+      }
+    }
+    throw new Error('无解');
+  }
+  if (list.length <= 2) {
+    if (list[0].first) {
+      return list[0].value.concat(list[1].value);
+    } else {
+      return list[1].value.concat(list[0].value);
+    }
+  }
+  let obj = list.shift();
+  if (obj.before) {
+    let pos = find(list, obj.before);
+    let item = {};
+    if (obj.value == undefined) { obj.value = [obj.id] }
+    if (list[pos].value == undefined) { list[pos].value = [list[pos].id] }
+
+    item.value = obj.value.concat(list[pos].value);
+    item.id = obj.value[0];
+    item.endId = list[pos].value[list[pos].value.length - 1];
+
+    item.first = list[pos].first;
+    item.last = list[pos].last;
+    item.before = list[pos].before;
+    item.after = list[pos].after;
+
+    list.splice(pos, 1);
+    list.push(item);
+  } else if (obj.after) {
+    let pos = find(list, obj.after);
+    let item = {};
+    if (obj.value == undefined) { obj.value = [obj.id] }
+    if (list[pos].value == undefined) { list[pos].value = [list[pos].id] }
+
+    item.value = list[pos].value.concat(obj.value);
+    item.id = list[pos].value[0];
+    item.endId = obj.value[obj.value.length - 1];
+
+    item.first = list[pos].first;
+    item.last = list[pos].last;
+    item.before = list[pos].before;
+    item.after = list[pos].after;
+
+    list.splice(pos, 1);
+    list.push(item);
+  } else {
+    list.push(obj);
+  }
+  console.log(list);
+
+  return sort(list);
+}
 
 sort([
    { id: 1, before: 2 },
