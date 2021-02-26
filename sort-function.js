@@ -16,6 +16,85 @@
  * 输出为
  * [7, 5, 1, 2, 3, 6, 8];
  */
+function sort(list) {
+  let find = function(id) {
+    for (let i = 0; i < list.length;i++) {
+      if (list[i].id == id) {
+        return i;
+      }
+    }
+    return -1;
+  }
+  let res = [];
+  let insert = function(id, res) {
+    let itemPos = find(id);
+    if (itemPos == -1) return;
+    let item = list[itemPos];
+    if (item.before) {
+      let pos = res.indexOf(item.before);
+      if (pos != -1) {
+        //已经存在，直接插入
+        res.splice(pos, 0, item.id);
+        list.splice(itemPos, 1);
+      } else {
+        //不存在，先插入依赖项
+        insert(item.before, res);
+        insert(item, res);
+      }
+    } else if (item.after) {
+      let pos = res.indexOf(item.after);
+      if (pos != -1) {
+        //已经存在，直接插入
+        res.splice(pos + 1, 0, item.id);
+        list.splice(itemPos, 1);
+      } else {
+        //不存在，先插入依赖项
+        insert(item.after, res);
+        insert(item, res);
+      }
+    } else if (item.first) {
+      res.splice(0, 0, item.id);
+      list.splice(itemPos, 1);
+    } else {
+      res.push(item.id);
+      list.splice(itemPos, 1);
+    }
+  }
+  //没有插完继续
+  while(list.length) {
+    insert(list[0].id, res);
+  }
+
+  return res;
+}
+
+sort([
+   { id: 1, before: 2 },
+   { id: 2, before: 3 },
+   { id: 3, before: 6 },
+   { id: 5, first: true },
+   { id: 6, last: true },
+   { id: 7, before: 5 },
+   { id: 8, after: 6 },
+  ])
+//[7, 5, 1, 2, 3, 6, 8]
+
+sort([
+   { id: 1, first: true },
+   { id: 2, before: 4 },
+   { id: 3, first: true },
+   { id: 4, before: 3 },
+   { id: 5, after: 3 },
+   { id: 6, after: 5 },
+   { id: 7, after: 6 },
+   { id: 8, before: 9 },
+   { id: 9, last: true },
+   { id: 10, after: 9 }
+  ])
+//[2, 4, 3, 5, 6, 7, 1, 8, 9, 10]
+
+
+
 function sort1(list) {
   //现在我对用例的理解是，所有的项都会链接到 fist 和 last 两部分上，再将两个拼起来即可。
   //可能有多个fist的情况，则不同first的部分前后关系不确定。
@@ -133,10 +212,10 @@ function sort2(list) {
   }
 }
 
-function sort(list) {
+function sort3(list) {
   // id 起始， endId 末尾， value 存起始到末尾的ids
   // 例如： { id: 1, endId 2, value: [1,5,4,2] }
-  
+
   let find = function(list, id) {
     for (let i = 0; i < list.length;i++) {
       if (list[i].id == id || list[i].endId == id) {
@@ -194,28 +273,3 @@ function sort(list) {
 
   return sort(list);
 }
-
-sort([
-   { id: 1, before: 2 },
-   { id: 2, before: 3 },
-   { id: 3, before: 6 },
-   { id: 5, first: true },
-   { id: 6, last: true },
-   { id: 7, before: 5 },
-   { id: 8, after: 6 },
-  ])
-//[7, 5, 1, 2, 3, 6, 8]
-
-sort([
-   { id: 1, first: true },
-   { id: 2, before: 4 },
-   { id: 3, first: true },
-   { id: 4, before: 3 },
-   { id: 5, after: 3 },
-   { id: 6, after: 5 },
-   { id: 7, after: 6 },
-   { id: 8, before: 9 },
-   { id: 9, last: true },
-   { id: 10, after: 9 }
-  ])
-//[1, 2, 4, 3, 5, 6, 7, 8, 9, 10]
